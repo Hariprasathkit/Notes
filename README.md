@@ -27,6 +27,7 @@ notes-app/
 │   │   ├── styles/global.css
 │   │   ├── App.jsx
 │   │   └── main.jsx
+│   ├── vite.config.js
 │   ├── .env.example
 │   └── package.json
 ├── backend/
