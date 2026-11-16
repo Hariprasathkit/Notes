@@ -1,12 +1,22 @@
 import { useCallback, useEffect, useState } from 'react';
 import { AlertCircle, FilePlus2, SearchX } from 'lucide-react';
 import Header from './components/Header';
-import SearchBar from './components/SearchBar';
+import Sidebar from './components/Sidebar';
 import NoteCard from './components/NoteCard';
 import NoteForm from './components/NoteForm';
 import DeleteConfirmModal from './components/DeleteConfirmModal';
 import Loading from './components/Loading';
 import { createNote, deleteNote, getErrorMessage, getNotes, updateNote } from './services/noteService';
+
+function getInitialTheme() {
+  const savedTheme = document.documentElement.dataset.theme;
+  if (savedTheme === 'light' || savedTheme === 'dark') return savedTheme;
+  try {
+    return window.localStorage.getItem('notes-studio-theme') === 'dark' ? 'dark' : 'light';
+  } catch {
+    return 'light';
+  }
+}
 
 export default function App() {
   const [notes, setNotes] = useState([]);
@@ -21,6 +31,22 @@ export default function App() {
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [feedback, setFeedback] = useState('');
+  const [theme, setTheme] = useState(getInitialTheme);
+  const [formError, setFormError] = useState('');
+  const [deleteError, setDeleteError] = useState('');
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    document.querySelector('meta[name="theme-color"]')?.setAttribute(
+      'content',
+      theme === 'dark' ? '#15151b' : '#f8f7f4',
+    );
+    try {
+      window.localStorage.setItem('notes-studio-theme', theme);
+    } catch {
+      setFeedback('Theme preference could not be saved in this browser.');
+    }
+  }, [theme]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => setDebouncedSearch(search), 300);
@@ -56,12 +82,19 @@ export default function App() {
 
   function openCreateForm() {
     setFormNote(null);
+    setFormError('');
     setShowForm(true);
   }
 
   function openEditForm(note) {
     setFormNote(note);
+    setFormError('');
     setShowForm(true);
+  }
+
+  function openDeleteConfirm(note) {
+    setDeleteError('');
+    setDeleteTarget(note);
   }
 
   async function handleSave(payload) {
@@ -74,10 +107,11 @@ export default function App() {
         await createNote(payload);
         setFeedback('Your note has been saved.');
       }
-      setShowForm(false);
       await loadNotes();
+      return true;
     } catch (requestError) {
-      setError(getErrorMessage(requestError));
+      setFormError(getErrorMessage(requestError));
+      return false;
     } finally {
       setSaving(false);
     }
@@ -87,11 +121,12 @@ export default function App() {
     setDeleting(true);
     try {
       await deleteNote(deleteTarget._id);
-      setDeleteTarget(null);
       setFeedback('Your note has been deleted.');
       await loadNotes();
+      return true;
     } catch (requestError) {
-      setError(getErrorMessage(requestError));
+      setDeleteError(getErrorMessage(requestError));
+      return false;
     } finally {
       setDeleting(false);
     }
@@ -100,32 +135,41 @@ export default function App() {
   const isSearching = Boolean(debouncedSearch.trim());
 
   return (
-    <div className="app-shell">
-      <Header onAddNote={openCreateForm} />
-      <main className="dashboard">
+    <div className="studio-shell">
+      <Sidebar
+        theme={theme}
+        noteCount={totalCount}
+        onShowAll={() => setSearch('')}
+        onToggleTheme={() => setTheme((currentTheme) => currentTheme === 'light' ? 'dark' : 'light')}
+      />
+      <div className="workspace">
+        <Header
+          onAddNote={openCreateForm}
+          search={search}
+          onSearchChange={setSearch}
+        />
+        <main className="dashboard">
         <section className="welcome-row">
           <div>
-            <p className="eyebrow">YOUR PERSONAL SPACE</p>
-            <h1>Notes that stay with you<span className="title-period">.</span></h1>
-            <p className="welcome-copy">Keep the little things, big ideas, and everything in between.</p>
+            <p className="eyebrow">A LITTLE SPACE TO THINK</p>
+            <h1>Your creative space<span className="title-period">.</span></h1>
+            <p className="welcome-copy">Capture your thoughts, one note at a time.</p>
           </div>
           <div className="note-count" aria-live="polite">
-            <span className="count-number">{totalCount}</span>
-            <span>{totalCount === 1 ? 'note' : 'notes'} saved</span>
+            <span className="count-number">{totalCount.toString().padStart(2, '0')}</span>
+            <span>{totalCount === 1 ? 'note' : 'notes'} in your studio</span>
           </div>
         </section>
 
         <section className="notes-toolbar" aria-label="Notes controls">
           <div className="toolbar-title">
-            <h2>{isSearching ? 'Search results' : 'All notes'}</h2>
+            <div>
+              <p className="eyebrow">YOUR COLLECTION</p>
+              <h2>{isSearching ? 'Search results' : 'All notes'}</h2>
+            </div>
             {!loading && <span className="result-count">{notes.length}</span>}
           </div>
-          <div className="toolbar-actions">
-            <SearchBar value={search} onChange={setSearch} />
-            <button className="button button-primary toolbar-add" onClick={openCreateForm}>
-              <FilePlus2 size={17} /> Add note
-            </button>
-          </div>
+          {isSearching && <span className="search-summary">Matching “{debouncedSearch}”</span>}
         </section>
 
         {feedback && <div className="toast" role="status">{feedback}</div>}
@@ -140,35 +184,43 @@ export default function App() {
         {loading ? <Loading /> : error ? null : notes.length ? (
           <section className="notes-grid" aria-label="Your notes">
             {notes.map((note) => (
-              <NoteCard key={note._id} note={note} onEdit={openEditForm} onDelete={setDeleteTarget} />
+              <NoteCard key={note._id} note={note} onEdit={openEditForm} onDelete={openDeleteConfirm} />
             ))}
           </section>
         ) : isSearching ? (
           <div className="empty-state">
-            <div className="empty-icon"><SearchX size={25} /></div>
+            <div className="empty-illustration"><SearchX size={27} /></div>
+            <p className="eyebrow">NOTHING ON THAT PAGE</p>
             <h2>No notes found</h2>
-            <p>Try a different search, or clear it to see all your notes.</p>
-            <button className="text-button" onClick={() => setSearch('')}>Clear search</button>
+            <p>Try another phrase or clear your search to see everything.</p>
+            <button className="button button-secondary empty-clear" onClick={() => setSearch('')}>Clear search</button>
           </div>
         ) : (
           <div className="empty-state">
-            <div className="empty-icon"><FilePlus2 size={25} /></div>
-            <h2>No notes yet</h2>
-            <p>Your best ideas start somewhere. Make a little room for them here.</p>
+            <div className="empty-illustration empty-illustration-notes">
+              <span className="empty-note empty-note-back" />
+              <span className="empty-note empty-note-front"><FilePlus2 size={23} /></span>
+            </div>
+            <p className="eyebrow">A FRESH PAGE</p>
+            <h2>Your space is waiting.</h2>
+            <p>Start capturing your thoughts and ideas.</p>
             <button className="button button-primary empty-add" onClick={openCreateForm}>
               <FilePlus2 size={17} /> Create your first note
             </button>
           </div>
         )}
-      </main>
-      <footer className="app-footer">A quiet place for everything on your mind.</footer>
+        </main>
+        <footer className="app-footer">A quiet place for everything on your mind.</footer>
+      </div>
 
       {showForm && (
         <NoteForm
           key={formNote?._id || 'new-note'}
           note={formNote}
           saving={saving}
+          error={formError}
           onClose={() => setShowForm(false)}
+          onClearError={() => setFormError('')}
           onSubmit={handleSave}
         />
       )}
@@ -176,6 +228,7 @@ export default function App() {
         <DeleteConfirmModal
           note={deleteTarget}
           deleting={deleting}
+          error={deleteError}
           onCancel={() => setDeleteTarget(null)}
           onConfirm={handleDelete}
         />

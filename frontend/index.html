@@ -3,9 +3,18 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#f8fafc" />
-    <meta name="description" content="A simple, thoughtful place to keep your notes." />
-    <title>Notes — your thoughts, organized</title>
+    <meta name="theme-color" content="#f8f7f4" />
+    <meta name="description" content="A creative space to capture and organize your thoughts." />
+    <link rel="icon" type="image/svg+xml" href="/memo-studio.svg" />
+    <title>NotesApp</title>
+    <script>
+      try {
+        const theme = localStorage.getItem('notes-studio-theme');
+        if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
+      } catch {
+        document.documentElement.dataset.theme = 'light';
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

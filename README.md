@@ -1,12 +1,13 @@
-# Papertrail Notes
+# Memo Studio — Creative Notes
 
-A small, full-stack notes manager for capturing and organizing ideas. The React dashboard talks to an Express REST API, and MongoDB stores notes durably so they survive server restarts.
+A creative notes studio for capturing and organizing ideas. The React dashboard talks to an Express REST API, and MongoDB stores notes durably so they survive server restarts.
 
 ## Features
 
 - Create, edit, view, search, and delete notes.
 - Search titles and note content without case sensitivity.
-- Responsive note grid, debounced search, character counters, loading/error/empty states, and success feedback.
+- Pastel sticky-note cards, a responsive studio layout, and persistent light/dark themes.
+- Debounced search, character counters, loading/error/empty states, and success feedback.
 - Input validation on both the client and server, plus consistent JSON API errors.
 - MongoDB persistence with creation and update timestamps.
 
@@ -23,6 +24,7 @@ notes-app/
 ├── frontend/
 │   ├── src/
 │   │   ├── components/
+│   │   │   ├── Sidebar.jsx
 │   │   ├── services/noteService.js
 │   │   ├── styles/global.css
 │   │   ├── App.jsx
