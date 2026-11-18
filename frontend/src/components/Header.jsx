@@ -4,10 +4,10 @@ import SearchBar from './SearchBar';
 export default function Header({ onAddNote, search, onSearchChange }) {
   return (
     <header className="studio-header">
-      <a className="header-brand" href="/" aria-label="Creative Notes Studio home">
+      {/*<a className="header-brand" href="/" aria-label="Creative Notes Studio home">
         <span className="brand-mark"><BookOpen size={19} strokeWidth={2.2} /></span>
-        <span>memo<span className="brand-accent">studio</span></span>
-      </a>
+        <span>New</span><span className="brand-accent">note</span>
+      </a>*/}
       <div className="studio-header-actions">
         <SearchBar value={search} onChange={onSearchChange} />
         <button className="button button-primary header-add" type="button" onClick={onAddNote}>

@@ -5,6 +5,8 @@ export default function DeleteConfirmModal({ note, deleting, error, onCancel, on
   const [closing, setClosing] = useState(false);
   const closeTimer = useRef(null);
 
+ // Clean up the close timer when the component unmounts to prevent memory leaks 
+
   useEffect(() => () => window.clearTimeout(closeTimer.current), []);
 
   const closeModal = useCallback(() => {
@@ -12,6 +14,8 @@ export default function DeleteConfirmModal({ note, deleting, error, onCancel, on
     setClosing(true);
     closeTimer.current = window.setTimeout(onCancel, 160);
   }, [closing, deleting, onCancel]);
+
+// Handle the Escape key to close the modal when pressed
 
   useEffect(() => {
     function handleKeyDown(event) {
@@ -21,6 +25,8 @@ export default function DeleteConfirmModal({ note, deleting, error, onCancel, on
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [closeModal]);
+
+// Confirm the deletion of the note and close the modal if successful
 
   async function confirmDelete() {
     const deleted = await onConfirm();

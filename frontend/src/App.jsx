@@ -8,6 +8,8 @@ import DeleteConfirmModal from './components/DeleteConfirmModal';
 import Loading from './components/Loading';
 import { createNote, deleteNote, getErrorMessage, getNotes, updateNote } from './services/noteService';
 
+// Function to determine the initial theme based on saved preferences or defaults
+
 function getInitialTheme() {
   const savedTheme = document.documentElement.dataset.theme;
   if (savedTheme === 'light' || savedTheme === 'dark') return savedTheme;
@@ -17,6 +19,8 @@ function getInitialTheme() {
     return 'light';
   }
 }
+
+// Main application component that manages state and renders the UI
 
 export default function App() {
   const [notes, setNotes] = useState([]);
@@ -35,6 +39,8 @@ export default function App() {
   const [formError, setFormError] = useState('');
   const [deleteError, setDeleteError] = useState('');
 
+  // Apply the theme to the document and save it to localStorage whenever it changes
+
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
     document.querySelector('meta[name="theme-color"]')?.setAttribute(
@@ -48,10 +54,14 @@ export default function App() {
     }
   }, [theme]);
 
+  // Debounce the search input to avoid making too many requests while typing
+
   useEffect(() => {
     const timer = window.setTimeout(() => setDebouncedSearch(search), 300);
     return () => window.clearTimeout(timer);
   }, [search]);
+
+// Load notes from the API whenever the debounced search term changes
 
   const loadNotes = useCallback(async () => {
     setLoading(true);
@@ -70,32 +80,39 @@ export default function App() {
     }
   }, [debouncedSearch]);
 
+
+  // Load notes on initial render and whenever the debounced search term changes
   useEffect(() => {
     loadNotes();
   }, [loadNotes]);
 
+  // Automatically clear feedback messages after a short delay
   useEffect(() => {
     if (!feedback) return undefined;
     const timer = window.setTimeout(() => setFeedback(''), 3200);
     return () => window.clearTimeout(timer);
   }, [feedback]);
 
+  // Functions to open the create/
   function openCreateForm() {
     setFormNote(null);
     setFormError('');
     setShowForm(true);
   }
 
+  // Open the edit form with the selected note's data
   function openEditForm(note) {
     setFormNote(note);
     setFormError('');
     setShowForm(true);
   }
-
+  // Open the delete confirmation modal for the selected note
   function openDeleteConfirm(note) {
     setDeleteError('');
     setDeleteTarget(note);
   }
+
+// Handle saving a note (either creating a new one or updating an existing one)
 
   async function handleSave(payload) {
     setSaving(true);
@@ -117,6 +134,8 @@ export default function App() {
     }
   }
 
+// Handle deleting a note
+
   async function handleDelete() {
     setDeleting(true);
     try {
@@ -132,22 +151,29 @@ export default function App() {
     }
   }
 
+// Determine if the user is currently searching based on the debounced search term
+
   const isSearching = Boolean(debouncedSearch.trim());
 
   return (
+
+    // Main application layout with sidebar, header, and notes grid
     <div className="studio-shell">
+      {/* Sidebar component with theme toggle and note count */}
       <Sidebar
         theme={theme}
         noteCount={totalCount}
         onShowAll={() => setSearch('')}
         onToggleTheme={() => setTheme((currentTheme) => currentTheme === 'light' ? 'dark' : 'light')}
       />
+      {/* Workspace area containing the header, notes grid, and modals */}
       <div className="workspace">
         <Header
           onAddNote={openCreateForm}
           search={search}
           onSearchChange={setSearch}
         />
+        {/* Main content area displaying notes, loading state, and error messages */}
         <main className="dashboard">
         <section className="welcome-row">
           <div>
@@ -181,6 +207,8 @@ export default function App() {
           </div>
         )}
 
+        {/* Display loading state, notes grid, or empty state based on the current state of the application*/}
+
         {loading ? <Loading /> : error ? null : notes.length ? (
           <section className="notes-grid" aria-label="Your notes">
             {notes.map((note) => (
@@ -212,6 +240,8 @@ export default function App() {
         </main>
         <footer className="app-footer">A quiet place for everything on your mind.</footer>
       </div>
+
+        {/* Render the note form modal if showForm is true, passing in the necessary props */}
 
       {showForm && (
         <NoteForm

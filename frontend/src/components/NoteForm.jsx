@@ -9,17 +9,25 @@ export default function NoteForm({ note, saving, error, onClose, onSubmit, onCle
   const titleRef = useRef(null);
   const closeTimer = useRef(null);
 
+  // Focus the title input when the component mounts
+
   useEffect(() => {
     titleRef.current?.focus();
   }, []);
 
+// Clear the close timer when the component unmounts to prevent memory leaks
+
   useEffect(() => () => window.clearTimeout(closeTimer.current), []);
+
+  // Function to handle closing the modal with a slight delay for animation
 
   const closeModal = useCallback(() => {
     if (saving || closing) return;
     setClosing(true);
     closeTimer.current = window.setTimeout(onClose, 160);
   }, [closing, onClose, saving]);
+
+  // Handle the Escape key to close the modal
 
   useEffect(() => {
     function handleKeyDown(event) {
@@ -29,6 +37,8 @@ export default function NoteForm({ note, saving, error, onClose, onSubmit, onCle
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [closeModal]);
+
+  // Handle form submission, validate input, and call the onSubmit prop
 
   async function handleSubmit(event) {
     event.preventDefault();

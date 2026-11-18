@@ -1,10 +1,14 @@
 import axios from 'axios';
 
+// Create an Axios instance with a base URL and default headers
+
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
   headers: { 'Content-Type': 'application/json' },
   timeout: 10000,
 });
+
+// Define functions to interact with the notes API, including getting, creating, updating, and deleting notes
 
 export function getNotes(search = '') {
   return api.get('/notes', { params: search.trim() ? { search: search.trim() } : {} }).then(({ data }) => data);
@@ -21,6 +25,8 @@ export function updateNote(id, note) {
 export function deleteNote(id) {
   return api.delete(`/notes/${id}`);
 }
+
+// Function to extract a user-friendly error message from an Axios error object
 
 export function getErrorMessage(error) {
   if (error.response?.data?.error) return error.response.data.error;

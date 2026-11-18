@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 
+// Define the Note schema with title and content fields, including validation rules for required fields and maximum lengths
+
 const noteSchema = new mongoose.Schema(
   {
     title: {

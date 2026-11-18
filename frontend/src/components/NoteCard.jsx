@@ -2,15 +2,21 @@ import { FileText, Pencil, Trash2 } from 'lucide-react';
 
 const cardColors = ['yellow', 'pink', 'lavender', 'mint', 'peach', 'blue'];
 
+// Function to determine the color of the note card based on its unique identifier or title
+
 function getCardColor(note) {
   const identity = note._id || note.title;
   const hash = [...identity].reduce((total, character) => total + character.charCodeAt(0), 0);
   return cardColors[hash % cardColors.length];
 }
 
+// Format the date in a user-friendly way, e.g., "Jan 1, 2024"
+
 function formatDate(value) {
   return new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(value));
 }
+
+// NoteCard component to display individual notes with edit and delete actions
 
 export default function NoteCard({ note, onEdit, onDelete }) {
   const updatedDate = new Date(note.updatedAt || note.createdAt);

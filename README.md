@@ -205,3 +205,7 @@ The API tests cover CRUD, newest-first ordering, case-insensitive search, title/
 - Add pagination for large note collections and an indexed search strategy for scale.
 - Add browser-level end-to-end coverage and accessibility checks, including keyboard focus management for dialogs.
 - Add deployment configuration, structured production logging, rate limiting, and operational health/readiness checks.
+
+## AI assistance
+
+AI tools assisted with implementation, UI refinement, debugging, and documentation. The application was validated with backend API tests, frontend production builds, and browser-based checks.
